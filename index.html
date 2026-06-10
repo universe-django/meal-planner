@@ -12,7 +12,15 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
     </style>
 </head>
-<body class="bg-[#f8fafc] text-slate-800 antialiased min-h-screen pb-8">
+<body class="bg-[#f8fafc] text-slate-800 antialiased min-h-screen pb-8 relative">
+
+    <!-- Success Toast Notification Layer -->
+    <div id="successToast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 transform scale-90 opacity-0 pointer-events-none transition-all duration-300 ease-out">
+        <div class="bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center gap-3 border border-slate-800">
+            <span class="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-xs">✓</span>
+            <p id="toastMessage" class="text-xs md:text-sm font-semibold tracking-wide"></p>
+        </div>
+    </div>
 
     <!-- Top Premium Header -->
     <header class="relative bg-gradient-to-r from-indigo-700 to-violet-800 text-white shadow-lg overflow-hidden py-6 md:py-8 px-4 mb-6 md:mb-8">
@@ -164,9 +172,9 @@
             <!-- Contact & Copyright Text -->
             <div class="space-y-2">
                 <p class="text-[11px] md:text-xs text-slate-500 font-medium">
-                    Need to modify or check past data? For the detailed history, 
-                    <a href="https://wa.me/01850235934" target="_blank" class="text-indigo-600 hover:text-indigo-700 font-bold underline decoration-indigo-200 hover:decoration-indigo-500 transition-all">
-                        Contact With Fahim
+                    Need to modify or check past data? For the detailed history, Contact With 
+                    <a href="https://wa.me/+8801850235934" target="_blank" class="text-indigo-600 hover:text-indigo-700 font-bold underline decoration-indigo-200 hover:decoration-indigo-500 transition-all">
+                       Fahim
                     </a>
                 </p>
                 <div class="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent w-40 mx-auto my-2.5"></div>
@@ -182,6 +190,23 @@
         
         const friends = ["Jilane", "Fahim", "Minhaj", "Jubayer", "Rayhan", "Khalid"];
         let dbData = [];
+
+        // Custom function to trigger Toast Notice
+        function showToast(message) {
+            const toast = document.getElementById('successToast');
+            const toastMsg = document.getElementById('toastMessage');
+            
+            toastMsg.innerText = message;
+            // Show Alert with Animation
+            toast.classList.remove('scale-90', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('scale-100', 'opacity-100');
+            
+            // Auto Hide after 3 seconds
+            setTimeout(() => {
+                toast.classList.remove('scale-100', 'opacity-100');
+                toast.classList.add('scale-90', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
 
         function setupForms() {
             const mealContainer = document.getElementById('mealInputsContainer');
@@ -299,7 +324,7 @@
                 meals: mealsObj
             };
 
-            await sendData(payload);
+            await sendData(payload, "Meals updated successfully! 📝");
         });
 
         document.getElementById('moneyForm').addEventListener('submit', async function(e) {
@@ -317,10 +342,10 @@
             };
 
             document.getElementById('moneyAmount').value = '';
-            await sendData(payload);
+            await sendData(payload, `${type} added successfully! 💰`);
         });
 
-        async function sendData(payload) {
+        async function sendData(payload, successMsg) {
             document.getElementById('loading').classList.remove('hidden');
             try {
                 await fetch(SCRIPT_URL, {
@@ -329,6 +354,7 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
+                showToast(successMsg);
                 setTimeout(fetchSheetData, 1500);
             } catch(err) {
                 alert("Error sending data to Google Sheets!");
